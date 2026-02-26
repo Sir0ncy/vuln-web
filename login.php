@@ -12,10 +12,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    $query = "SELECT * FROM users WHERE username = '$username' AND password = '$password'";
-    $debug_query = $query;
+    // Use prepared statements to prevent SQL injection
+    $query = "SELECT * FROM users WHERE username = ? AND password = ?";
+    $debug_query = "SELECT * FROM users WHERE username = '" . htmlspecialchars($username) . "' AND password = '" . htmlspecialchars($password) . "'";
 
-    $result = $conn->query($query);
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ss", $username, $password);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result && $result->num_rows > 0) {
         $row = $result->fetch_assoc();
