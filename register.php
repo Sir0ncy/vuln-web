@@ -7,12 +7,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = $_POST['username'];
     $password = $_POST['password'];
 
-    $query = "INSERT INTO users (username, password) VALUES ('$username', '$password')";
-
-    if ($conn->query($query) === TRUE) {
+    // Use prepared statements to prevent SQL injection
+    $query = "INSERT INTO users (username, password) VALUES (?, ?)";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ss", $username, $password);
+    
+    if ($stmt->execute() === TRUE) {
         $msg = "Regist successfull :)";
     } else {
-        $msg = "Error: " . $conn->error;
+        $msg = "Error: " . $stmt->error;
     }
 }
 ?>
